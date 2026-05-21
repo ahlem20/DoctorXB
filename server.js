@@ -27,7 +27,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/prescriptions', prescriptionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-
+app.get('/', (req, res) => {
+  res.send('API is running...');
+});
 app.use('/uploads', express.static('uploads'));
 
 app.use(notFound);

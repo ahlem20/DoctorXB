@@ -16,10 +16,13 @@ connectDB();
 
 const app = express();
 
-app.use(cors({
-  origin: ['https://maclinic.onrender.com', 'http://localhost:5173', 'http://localhost:3000'],
-  credentials: true
-}));
+// 2. Configure CORS options
+const corsOptions = {
+  origin: 'https://maclinic.onrender.com', // Allow only your frontend
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true, // Allow cookies/auth headers if you use them
+  optionsSuccessStatus: 204 // Some legacy browsers choke on 204
+};
 app.use(express.json());
 app.use(morgan('dev'));
 

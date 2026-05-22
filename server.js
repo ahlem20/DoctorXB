@@ -16,10 +16,34 @@ connectDB();
 
 const app = express();
 
-app.use(cors({
-  origin: ['https://maclinic.onrender.com', 'http://localhost:5173', 'http://localhost:3000'],
-  credentials: true
-}));
+const allowedOrigins = [
+  'https://maclinic.onrender.com',
+  'http://localhost:5173',
+  'http://localhost:3000'
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const isAllowed = allowedOrigins.includes(origin) || 
+                      origin.endsWith('.onrender.com') ||
+                      origin.startsWith('http://localhost:');
+                      
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      console.log(`CORS blocked for origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json());
 app.use(morgan('dev'));
 

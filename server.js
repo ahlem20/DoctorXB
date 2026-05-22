@@ -9,6 +9,7 @@ import authRoutes from './routes/authRoutes.js';
 import patientRoutes from './routes/patientRoutes.js';
 import prescriptionRoutes from './routes/prescriptionRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
+import chargeRoutes from './routes/chargeRoutes.js';
 
 dotenv.config();
 
@@ -50,6 +51,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/prescriptions', prescriptionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/charges', chargeRoutes);
 app.get('/', (req, res) => {
   res.send('API is running...');
 });

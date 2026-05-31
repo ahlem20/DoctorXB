@@ -18,7 +18,7 @@ connectDB();
 const app = express();
 
 const allowedOrigins = [
-  'https://maclinic.onrender.com',
+  'https://doctorxb.onrender.com',
   'http://localhost:5173',
   'http://localhost:3000'
 ];

@@ -1,65 +1,86 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import morgan from 'morgan';
-import connectDB from './config/db.js';
-import { notFound, errorHandler } from './middleware/errorMiddleware.js';
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import morgan from "morgan";
+import connectDB from "./config/db.js";
+import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
-import authRoutes from './routes/authRoutes.js';
-import patientRoutes from './routes/patientRoutes.js';
-import prescriptionRoutes from './routes/prescriptionRoutes.js';
-import dashboardRoutes from './routes/dashboardRoutes.js';
-import chargeRoutes from './routes/chargeRoutes.js';
+import authRoutes from "./routes/authRoutes.js";
+import patientRoutes from "./routes/patientRoutes.js";
+import prescriptionRoutes from "./routes/prescriptionRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
+import chargeRoutes from "./routes/chargeRoutes.js";
+import appointmentRoutes from "./routes/appointmentRoutes.js";
+import chatRoutes from "./routes/chatRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
+import { protectLicense } from "./middleware/licenseMiddleware.js";
 
 dotenv.config();
 
-connectDB();
+await connectDB();
+await initLicense();
 
 const app = express();
 
 const allowedOrigins = [
-  'https://maclinic.onrender.com',
-  'http://localhost:5173',
-  'http://localhost:3000'
+  "https://maclinic.onrender.com",
+  "http://localhost:5173",
+  "http://localhost:3000",
 ];
 
 const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    
-    const isAllowed = allowedOrigins.includes(origin) || 
-                      origin.endsWith('.onrender.com') ||
-                      origin.startsWith('http://localhost:');
-                      
+
+    const isAllowed =
+      allowedOrigins.includes(origin) ||
+      origin.endsWith(".onrender.com") ||
+      origin.startsWith("http://localhost:");
+
     if (isAllowed) {
       callback(null, true);
     } else {
       console.log(`CORS blocked for origin: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error("Not allowed by CORS"));
     }
   },
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
 };
 
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use(morgan('dev'));
+app.use(morgan("dev"));
 
-app.use('/api/auth', authRoutes);
-app.use('/api/patients', patientRoutes);
-app.use('/api/prescriptions', prescriptionRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/charges', chargeRoutes);
-app.get('/', (req, res) => {
-  res.send('API is running...');
+app.use("/api/auth", authRoutes);
+app.use("/api/patients", protectLicense, patientRoutes);
+app.use("/api/prescriptions", protectLicense, prescriptionRoutes);
+app.use("/api/dashboard", protectLicense, dashboardRoutes);
+app.use("/api/charges", protectLicense, chargeRoutes);
+app.use("/api/appointments", protectLicense, appointmentRoutes);
+app.use("/api/chats", protectLicense, chatRoutes);
+app.use("/api/notifications", protectLicense, notificationRoutes);
+app.get("/", (req, res) => {
+  res.send("API is running...");
 });
-app.use('/uploads', express.static('uploads'));
+
+// Serve React build in production
+if (process.env.NODE_ENV === "production") {
+  const path = require("path");
+  const buildPath = path.join(__dirname, "..", "frontend", "dist");
+  app.use(express.static(buildPath));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(buildPath, "index.html"));
+  });
+}
+app.use("/uploads", express.static("uploads"));
 
 app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`));
+app.listen(PORT, () =>
+  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`)
+);

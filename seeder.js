@@ -15,12 +15,26 @@ const seedData = async () => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash('password123', salt);
 
-    await User.create({
-      name: 'Dr. Smith',
-      email: 'doctor@maclinic.com',
-      password: hashedPassword,
-      role: 'Doctor',
-    });
+    await User.create([
+      {
+        name: 'Dr. Smith',
+        email: 'doctor@maclinic.com',
+        password: hashedPassword,
+        role: 'Doctor',
+      },
+      {
+        name: 'Nurse Amina',
+        email: 'nurse@maclinic.com',
+        password: hashedPassword,
+        role: 'Nurse',
+      },
+      {
+        name: 'Receptionist Sarah',
+        email: 'receptionist@maclinic.com',
+        password: hashedPassword,
+        role: 'Receptionist',
+      }
+    ]);
 
     console.log('Data Imported!');
     process.exit();

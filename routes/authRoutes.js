@@ -9,6 +9,7 @@ router.post('/register', registerUser);
 router.route('/profile').get(protect, getUserProfile).put(protect, updateUserProfile);
 
 router.route('/users').get(protect, admin, getUsers);
+router.route('/staff').get(protect, getUsers);
 router.route('/users/:id')
   .delete(protect, admin, deleteUser);
 router.route('/users/:id/permissions').put(protect, admin, updateUserPermissions);

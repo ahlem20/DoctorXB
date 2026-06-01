@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import generateToken from '../utils/generateToken.js';
 import bcrypt from 'bcryptjs';
+import { checkDoctorLimit } from '../utils/licenseService.js';
 
 // @desc    Auth user & get token
 // @route   POST /api/auth/login
@@ -58,6 +59,11 @@ const registerUser = async (req, res) => {
     if (role === 'Médecin') finalRole = 'Doctor';
     else if (role === 'Infirmier(ère)') finalRole = 'Nurse';
     else if (role === 'Réceptionniste') finalRole = 'Receptionist';
+
+    // Centralized licensing check for Doctor accounts
+    if (finalRole === 'Doctor') {
+      await checkDoctorLimit();
+    }
 
     const user = await User.create({
       name,

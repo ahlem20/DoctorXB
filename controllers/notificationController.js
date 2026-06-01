@@ -24,9 +24,8 @@ const getNotifications = async (req, res) => {
     .sort({ createdAt: -1 })
     .limit(30);
 
-    // Map to include an isRead field for convenience on the frontend
     const mapped = notifications.map(notif => {
-      const isRead = notif.readBy.includes(req.user._id);
+      const isRead = notif.readBy && Array.isArray(notif.readBy) ? notif.readBy.includes(req.user._id) : false;
       return {
         _id: notif._id,
         message: notif.message,
@@ -38,6 +37,7 @@ const getNotifications = async (req, res) => {
 
     res.json(mapped);
   } catch (error) {
+    console.error('Error in getNotifications:', error);
     res.status(500).json({ message: error.message || 'Server error' });
   }
 };
@@ -50,6 +50,9 @@ const markAsRead = async (req, res) => {
     const notification = await Notification.findById(req.params.id);
 
     if (notification) {
+      if (!notification.readBy) {
+        notification.readBy = [];
+      }
       if (!notification.readBy.includes(req.user._id)) {
         notification.readBy.push(req.user._id);
         await notification.save();
@@ -89,6 +92,9 @@ const markAllAsRead = async (req, res) => {
     });
 
     for (let notif of notifications) {
+      if (!notif.readBy) {
+        notif.readBy = [];
+      }
       notif.readBy.push(req.user._id);
       await notif.save();
     }

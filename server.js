@@ -2,6 +2,8 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import morgan from "morgan";
+import path from "path";
+import { fileURLToPath } from "url";
 import connectDB from "./config/db.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
@@ -13,12 +15,13 @@ import chargeRoutes from "./routes/chargeRoutes.js";
 import appointmentRoutes from "./routes/appointmentRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
-import { protectLicense } from "./middleware/licenseMiddleware.js";
 
 dotenv.config();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 await connectDB();
-await initLicense();
 
 const app = express();
 
@@ -54,20 +57,19 @@ app.use(express.json());
 app.use(morgan("dev"));
 
 app.use("/api/auth", authRoutes);
-app.use("/api/patients", protectLicense, patientRoutes);
-app.use("/api/prescriptions", protectLicense, prescriptionRoutes);
-app.use("/api/dashboard", protectLicense, dashboardRoutes);
-app.use("/api/charges", protectLicense, chargeRoutes);
-app.use("/api/appointments", protectLicense, appointmentRoutes);
-app.use("/api/chats", protectLicense, chatRoutes);
-app.use("/api/notifications", protectLicense, notificationRoutes);
+app.use("/api/patients", patientRoutes);
+app.use("/api/prescriptions", prescriptionRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/charges", chargeRoutes);
+app.use("/api/appointments", appointmentRoutes);
+app.use("/api/chats", chatRoutes);
+app.use("/api/notifications", notificationRoutes);
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
 // Serve React build in production
 if (process.env.NODE_ENV === "production") {
-  const path = require("path");
   const buildPath = path.join(__dirname, "..", "frontend", "dist");
   app.use(express.static(buildPath));
   app.get("*", (req, res) => {

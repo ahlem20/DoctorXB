@@ -57,6 +57,7 @@ const sendChatMessage = async (req, res) => {
 
     res.status(201).json(populated);
   } catch (error) {
+    console.error('Error in sendChatMessage:', error);
     res.status(400).json({ message: error.message || 'Failed to send message' });
   }
 };

@@ -15,6 +15,8 @@ import chargeRoutes from "./routes/chargeRoutes.js";
 import appointmentRoutes from "./routes/appointmentRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import consultationRoutes from "./routes/consultationRoutes.js";
+import catalogRoutes from "./routes/catalogRoutes.js";
 
 dotenv.config();
 
@@ -26,14 +28,13 @@ await connectDB();
 const app = express();
 
 const allowedOrigins = [
-  'https://maclinic.onrender.com',
-  'http://localhost:5173',
-  'http://localhost:3000'
+  "https://maclinic.onrender.com",
+  "http://localhost:5173",
+  "http://localhost:3000",
 ];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
 
     const isAllowed =
@@ -52,10 +53,13 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
+// ✅ CRITICAL: Middleware MUST come BEFORE routes
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(express.json()); // ✅ This MUST be here
+app.use(express.urlencoded({ extended: true })); // ✅ Add this too
 app.use(morgan("dev"));
 
+// ✅ NOW mount all routes
 app.use("/api/auth", authRoutes);
 app.use("/api/patients", patientRoutes);
 app.use("/api/prescriptions", prescriptionRoutes);
@@ -64,6 +68,9 @@ app.use("/api/charges", chargeRoutes);
 app.use("/api/appointments", appointmentRoutes);
 app.use("/api/chats", chatRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/consultation", consultationRoutes); // ✅ This will create /api/consultation/:id/consultations
+app.use("/api/catalog", catalogRoutes);
+
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
@@ -76,8 +83,10 @@ if (process.env.NODE_ENV === "production") {
     res.sendFile(path.join(buildPath, "index.html"));
   });
 }
+
 app.use("/uploads", express.static("uploads"));
 
+// ✅ Error handling MUST come LAST
 app.use(notFound);
 app.use(errorHandler);
 

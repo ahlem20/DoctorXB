@@ -1,4 +1,5 @@
 import ChatMessage from '../models/ChatMessage.js';
+import Notification from '../models/Notification.js';
 
 // @desc    Get chat messages (General channel or Direct Messages with another user)
 // @route   GET /api/chats
@@ -54,6 +55,15 @@ const sendChatMessage = async (req, res) => {
     const populated = await ChatMessage.findById(savedMessage._id)
       .populate('sender', 'name role')
       .populate('receiver', 'name role');
+
+    // Create Notification for the receiver (or everyone if it's general)
+    const notification = new Notification({
+      message: `New message from ${populated.sender.name}`,
+      type: 'general',
+      targetUser: receiver || null,
+      readBy: [req.user._id], // Mark as read for the sender
+    });
+    await notification.save();
 
     res.status(201).json(populated);
   } catch (error) {

@@ -4,7 +4,10 @@ import Prescription from '../models/Prescription.js';
 // @route   GET /api/prescriptions
 // @access  Private
 const getPrescriptions = async (req, res) => {
-  const prescriptions = await Prescription.find({}).populate('patient', 'fullName age').populate('doctor', 'name').sort({ createdAt: -1 });
+  const prescriptions = await Prescription.find({})
+    .populate('patient', 'fullName age')
+    .populate('doctor', 'name')
+    .sort({ createdAt: -1 });
   res.json(prescriptions);
 };
 
@@ -12,17 +15,23 @@ const getPrescriptions = async (req, res) => {
 // @route   POST /api/prescriptions
 // @access  Private
 const createPrescription = async (req, res) => {
-  const { patientId, medicines, notes, price } = req.body;
+  const { patientId, medicines, analyses, radios, notes, price } = req.body;
 
-  if (!patientId || !medicines || medicines.length === 0) {
+  const hasMedicines = medicines && medicines.length > 0;
+  const hasAnalyses = analyses && analyses.length > 0;
+  const hasRadios = radios && radios.length > 0;
+
+  if (!patientId || (!hasMedicines && !hasAnalyses && !hasRadios)) {
     res.status(400);
-    throw new Error('Please provide patient and medicines');
+    throw new Error('Please provide patient and at least one medicine, analysis, or radio');
   }
 
   const prescription = new Prescription({
     patient: patientId,
     doctor: req.user._id,
-    medicines,
+    medicines: medicines || [],
+    analyses: analyses || [],
+    radios: radios || [],
     notes,
     price: price || 0,
   });

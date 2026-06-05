@@ -14,9 +14,22 @@ const prescriptionSchema = mongoose.Schema(
     },
     medicines: [
       {
-        name: { type: String, required: true },
-        dosage: { type: String, required: true },
-        duration: { type: String, required: true },
+        name: { type: String },
+        dosage: { type: String },
+        duration: { type: String },
+      },
+    ],
+    analyses: [
+      {
+        catalogId: { type: mongoose.Schema.Types.ObjectId, ref: 'CatalogAnalysis' },
+        name: { type: String },
+      },
+    ],
+    radios: [
+      {
+        catalogId: { type: mongoose.Schema.Types.ObjectId, ref: 'CatalogRadio' },
+        name: { type: String },
+        notes: { type: String },
       },
     ],
     notes: {

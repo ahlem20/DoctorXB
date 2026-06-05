@@ -20,4 +20,5 @@ router.route('/:id').get(protect, getPatientById).put(protect, updatePatient).de
 router.route('/:id/archive').put(protect, archivePatient);
 router.route('/:id/notes').get(protect, getPatientNotes).post(protect, addPatientNote);
 
+
 export default router;
